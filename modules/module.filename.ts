@@ -3,6 +3,11 @@ import path from 'path';
 import { AvailableFilenameVars } from './module.args';
 import { console } from './log';
 
+// Utility function to replace whitespace with dots
+const replaceWhitespaceWithDots = (input: string): string => {
+  return input.replace(/\s+/g, '.'); // Replaces all whitespaces with dots
+};
+
 export type Variable<T extends string = AvailableFilenameVars> = ({
   type: 'number',
   replaceWith: number
@@ -31,7 +36,7 @@ const parseFileName = (input: string, variables: Variable[], numbers: number, ov
     
     if (use.type === 'number') {
       const len = use.replaceWith.toFixed(0).length;
-      const replaceStr = len < numbers ? '0'.repeat(numbers - len) + use.replaceWith : use.replaceWith+'';
+      const replaceStr = len < numbers ? '0'.repeat(numbers - len) + use.replaceWith : use.replaceWith+''; 
       input = input.replace(type, replaceStr); 
     } else {
       if (use.sanitize) 
@@ -39,6 +44,11 @@ const parseFileName = (input: string, variables: Variable[], numbers: number, ov
       input = input.replace(type, use.replaceWith);
     }
   }
+
+  // Replace whitespace with dots in the final input
+  input = replaceWhitespaceWithDots(input);
+
+  // Split by path separator and clean each part, then return
   return input.split(path.sep).map(a => shlp.cleanupFilename(a));
 };
 
