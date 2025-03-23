@@ -204,122 +204,122 @@ class Merger {
 
   public MkvMerge = () => {
     const args: string[] = [];
-
     let hasVideo = false;
 
     args.push(`-o "${this.options.output}"`);
     args.push(...this.options.options.mkvmerge);
 
+    // Ensure "Japanese" audio is the first track
+    this.options.videoAndAudio.sort((a, b) => (a.lang.name === "Japanese" ? -1 : 1));
+    this.options.onlyAudio.sort((a, b) => (a.lang.name === "Japanese" ? -1 : 1));
+
+    // Process video-only tracks
     for (const vid of this.options.onlyVid) {
-      if (!hasVideo || this.options.keepAllVideos) {
-        args.push(
-          '--video-tracks 0',
-          '--no-audio'
-        );
-        const trackName = ((this.options.videoTitle ?? vid.lang.name) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]'));
-        args.push('--track-name', `0:"${trackName}"`);
-        args.push(`--language 0:${vid.lang.code}`);
-        hasVideo = true;
+        if (!hasVideo || this.options.keepAllVideos) {
+            args.push('--video-tracks 0', '--no-audio');
+            args.push('--track-name', `0:"Japanese"`); // Hardcoded video title
+            args.push('--language', `0:ja`); // Set video language to Japanese
+            hasVideo = true;
+            args.push(`"${vid.path}"`);
+        }
+    }
+
+    // Process video with audio tracks
+    for (const [index, vid] of this.options.videoAndAudio.entries()) {
+        const audioTrackNum = index === 0 ? "0" : "1"; // Japanese audio will be track 0
+        const videoTrackNum = "1";
+
+        if (vid.delay) {
+            args.push(`--sync ${audioTrackNum}:-${Math.ceil(vid.delay * 1000)}`);
+        }
+
+        if (!hasVideo || this.options.keepAllVideos) {
+            args.push(`--video-tracks ${videoTrackNum}`, `--audio-tracks ${audioTrackNum}`);
+            args.push('--track-name', `0:"Japanese"`); // Hardcoded video title
+            args.push('--language', `0:ja`); // Set video language to Japanese
+            args.push(`--language ${audioTrackNum}:${vid.lang.code}`);
+
+            if (this.options.defaults.audio.code === vid.lang.code) {
+                args.push(`--default-track ${audioTrackNum}`);
+            } else {
+                args.push(`--default-track ${audioTrackNum}:0`);
+            }
+
+            hasVideo = true;
+        } else {
+            args.push('--no-video', `--audio-tracks ${audioTrackNum}`);
+            args.push(`--language ${audioTrackNum}:${vid.lang.code}`);
+        }
+
         args.push(`"${vid.path}"`);
-      }
     }
 
-    for (const vid of this.options.videoAndAudio) {
-      const audioTrackNum = this.options.inverseTrackOrder ? '0' : '1';
-      const videoTrackNum = this.options.inverseTrackOrder ? '1' : '0';
-      if (vid.delay) {
-        args.push(
-          `--sync ${audioTrackNum}:-${Math.ceil(vid.delay*1000)}`
-        );
-      }
-      if (!hasVideo || this.options.keepAllVideos) {
-        args.push(
-          `--video-tracks ${videoTrackNum}`,
-          `--audio-tracks ${audioTrackNum}`
-        );
-        const trackName = ((this.options.videoTitle ?? vid.lang.name) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]'));
-        args.push('--track-name', `0:"${trackName}"`);
-        //args.push('--track-name', `1:"${trackName}"`);
-        args.push(`--language ${audioTrackNum}:${vid.lang.code}`);
-        if (this.options.defaults.audio.code === vid.lang.code) {
-          args.push(`--default-track ${audioTrackNum}`);
+    // Process separate audio-only tracks
+    for (const [index, aud] of this.options.onlyAudio.entries()) {
+        const trackNum = index === 0 ? "0" : "1"; // Japanese audio first
+
+        args.push('--track-name', `0:"${aud.lang.name}"`);
+        args.push(`--language 0:${aud.lang.code}`);
+        args.push('--no-video', '--audio-tracks 0');
+
+        if (this.options.defaults.audio.code === aud.lang.code) {
+            args.push('--default-track 0');
         } else {
-          args.push(`--default-track ${audioTrackNum}:0`);
+            args.push('--default-track 0:0');
         }
-        hasVideo = true;
-      } else {
-        args.push(
-          '--no-video',
-          `--audio-tracks ${audioTrackNum}`
-        );
-        if (this.options.defaults.audio.code === vid.lang.code) {
-          args.push(`--default-track ${audioTrackNum}`);
-        } else {
-          args.push(`--default-track ${audioTrackNum}:0`);
-        }
-        args.push('--track-name', `${audioTrackNum}:"${vid.lang.name}"`);
-        args.push(`--language ${audioTrackNum}:${vid.lang.code}`);
-      }
-      args.push(`"${vid.path}"`);
+
+        args.push(`"${aud.path}"`);
     }
 
-    for (const aud of this.options.onlyAudio) {
-      const trackName = aud.lang.name;
-      args.push('--track-name', `0:"${trackName}"`);
-      args.push(`--language 0:${aud.lang.code}`);
-      args.push(
-        '--no-video',
-        '--audio-tracks 0'
-      );
-      if (this.options.defaults.audio.code === aud.lang.code) {
-        args.push('--default-track 0');
-      } else {
-        args.push('--default-track 0:0');
-      }
-      args.push(`"${aud.path}"`);
-    }
+    // Sort subtitle tracks: First regular subtitles, then "signs" and "CC"
+    const sortedSubtitles = [...this.options.subtitles].sort((a, b) => {
+        const aHasTag = a.closedCaption || a.signs ? 1 : 0;
+        const bHasTag = b.closedCaption || b.signs ? 1 : 0;
+        return aHasTag - bHasTag; // Places "signs" and "CC" last
+    });
 
-    if (this.options.subtitles.length > 0) {
-      for (const subObj of this.options.subtitles) {
-        if (subObj.delay) {
-          args.push(
-            `--sync 0:-${Math.ceil(subObj.delay*1000)}`
-          );
+    if (sortedSubtitles.length > 0) {
+        for (const subObj of sortedSubtitles) {
+            if (subObj.delay) {
+                args.push(`--sync 0:-${Math.ceil(subObj.delay * 1000)}`);
+            }
+
+            args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + 
+                (subObj.closedCaption ? ` ${this.options.ccTag}` : '') + 
+                (subObj.signs ? ' Signs' : '')}"`);
+            args.push('--language', `0:"${subObj.language.code}"`);
+
+            if (this.options.defaults.sub.code === subObj.language.code && !subObj.closedCaption) {
+                args.push('--default-track 0');
+            } else {
+                args.push('--default-track 0:0');
+            }
+
+            args.push(`"${subObj.file}"`);
         }
-        args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ` ${this.options.ccTag}` : ''}` + `${subObj.signs === true ? ' Signs' : ''}`}"`);
-        args.push('--language', `0:"${subObj.language.code}"`);
-        //TODO: look into making Closed Caption default if it's the only sub of the default language downloaded
-        if (this.options.defaults.sub.code === subObj.language.code && !subObj.closedCaption) {
-          args.push('--default-track 0');
-        } else {
-          args.push('--default-track 0:0');
-        }
-        args.push(`"${subObj.file}"`);
-      }
     } else {
-      args.push(
-        '--no-subtitles',
-      );
+        args.push('--no-subtitles');
     }
 
+    // Handle font attachments
     if (this.options.fonts && this.options.fonts.length > 0) {
-      for (const f of this.options.fonts) {
-        args.push('--attachment-name', f.name);
-        args.push('--attachment-mime-type', f.mime);
-        args.push('--attach-file', `"${f.path}"`);
-      }
+        for (const f of this.options.fonts) {
+            args.push('--attachment-name', f.name);
+            args.push('--attachment-mime-type', f.mime);
+            args.push('--attach-file', `"${f.path}"`);
+        }
     } else {
-      args.push(
-        '--no-attachments'
-      );
+        args.push('--no-attachments');
     }
 
+    // Include chapters if available
     if (this.options.chapters && this.options.chapters.length > 0) {
-      args.push(`--chapters "${this.options.chapters[0].path}"`);
+        args.push(`--chapters "${this.options.chapters[0].path}"`);
     }
 
     return args.join(' ');
-  };
+};
+
 
   public static checkMerger(bin: {
     mkvmerge?: string,
