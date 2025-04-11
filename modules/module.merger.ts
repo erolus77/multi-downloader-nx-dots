@@ -13,7 +13,7 @@ import ffprobe from 'ffprobe';
 import { appArgv } from './module.app-args';
 const argv = appArgv({});
 
-console.log('Parsed args:', argv);
+//console.log('Parsed args:', argv);
 
 export type MergerInput = {
   path: string,
