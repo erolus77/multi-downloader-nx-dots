@@ -2,6 +2,10 @@
 const cssPrefixRx = /\.rmp-container>\.rmp-content>\.rmp-cc-area>\.rmp-cc-container>\.rmp-cc-display>\.rmp-cc-cue /g;
 
 import { console } from './log';
+//For ScaledBorderAndShadow input
+//import * as yargs from './module.app-args';
+import { appArgv } from './module.app-args';
+const argv = appArgv({});
 
 // colors
 import colors from './module.colors.json';
@@ -297,6 +301,7 @@ function pushBuffer(buffer: ReturnType<typeof convertLine>[], events: string[]) 
 
 function convert(css: Css, vtt: Vtt[]) {
   const stylesMap: Record<string, string> = {};
+  const scaledSetting = argv.ScaledBorderAndShadow; // get value from CLI args
   let ass = [
     '\ufeff[Script Info]',
     'Title: ' + relGroup,
@@ -304,7 +309,7 @@ function convert(css: Css, vtt: Vtt[]) {
     'WrapStyle: 0',
     'PlayResX: 640',
     'PlayResY: 360',
-    'ScaledBorderAndShadow: yes',
+    `ScaledBorderAndShadow: ${scaledSetting}`,
     '',
     '[V4+ Styles]',
     'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
