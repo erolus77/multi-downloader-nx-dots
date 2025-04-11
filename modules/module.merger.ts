@@ -9,6 +9,12 @@ import { exec } from './sei-helper-fixes';
 import { console } from './log';
 import ffprobe from 'ffprobe';
 
+//For signSubsForced input
+import { appArgv } from './module.app-args';
+const argv = appArgv({});
+
+console.log('Parsed args:', argv);
+
 export type MergerInput = {
   path: string,
   lang: LanguageItem,
@@ -47,6 +53,7 @@ export type MergerOptions = {
   keepAllVideos?: boolean,
   fonts?: ParsedFont[],
   skipSubMux?: boolean,
+  signSubsForced?: argv.signSubsForced,
   options: {
     ffmpeg: string[],
     mkvmerge: string[]
@@ -60,6 +67,7 @@ export type MergerOptions = {
 class Merger {
   
   constructor(private options: MergerOptions) {
+	this.options.signSubsForced ??= 'no'; // Default to 'no' if undefined
     if (this.options.skipSubMux)
       this.options.subtitles = [];
     if (this.options.videoTitle)
@@ -271,7 +279,7 @@ class Merger {
         args.push(`"${aud.path}"`);
     }
 
-    // Sort subtitle tracks: First regular subtitles, then "signs" and "CC"
+    /* // Sort subtitle tracks: First regular subtitles, then "signs" and "CC"
     const sortedSubtitles = [...this.options.subtitles].sort((a, b) => {
         const aHasTag = a.closedCaption || a.signs ? 1 : 0;
         const bHasTag = b.closedCaption || b.signs ? 1 : 0;
@@ -299,7 +307,60 @@ class Merger {
         }
     } else {
         args.push('--no-subtitles');
-    }
+    } */
+	
+	// Sort subtitle tracks: First regular subtitles, then "signs" and "CC"
+	const sortedSubtitles = [...this.options.subtitles].sort((a, b) => {
+		const aHasTag = a.closedCaption || a.signs ? 1 : 0;
+		const bHasTag = b.closedCaption || b.signs ? 1 : 0;
+		return aHasTag - bHasTag; // Places "signs" and "CC" last
+	});
+
+	if (sortedSubtitles.length > 0) {
+		for (const subObj of sortedSubtitles) {
+			if (subObj.delay) {
+				args.push(`--sync 0:-${Math.ceil(subObj.delay * 1000)}`);
+			}
+
+			const langName = subObj.language.language || subObj.language.name;
+			const trackName = `${langName}${subObj.closedCaption ? ` ${this.options.ccTag}` : ''}${subObj.signs ? ' Signs' : ''}`;
+			args.push('--track-name', `0:"${trackName}"`);
+			args.push('--language', `0:"${subObj.language.code}"`);
+
+			let isDefault = false;
+			let isForced = false;
+
+			if (subObj.signs) {
+            // Apply logic based on "sign-subs-forced" setting
+				switch (this.options.signSubsForced) {
+					case 'yes':
+						isDefault = true;
+						isForced = true;
+						break;
+					case 'default':
+						isDefault = true;
+						isForced = false;
+						break;
+					case 'no':
+					default:
+						isDefault = false;
+						isForced = false;
+						break;
+				}
+			} else {
+				// Regular subtitle handling
+				isDefault = this.options.defaults.sub.code === subObj.language.code && !subObj.closedCaption;
+			}
+
+			args.push(`--default-track 0${isDefault ? '' : ':0'}`);
+			args.push(`--forced-track 0${isForced ? '' : ':0'}`);
+
+			args.push(`"${subObj.file}"`);
+		}
+	} else {
+		args.push('--no-subtitles');
+	}
+
 
     // Handle font attachments
     if (this.options.fonts && this.options.fonts.length > 0) {
