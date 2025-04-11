@@ -79,6 +79,8 @@ let argvC: {
   originalFontSize: boolean;
   keepAllVideos: boolean;
   syncTiming: boolean;
+  signSubsForced: 'yes' | 'default' | 'no';
+  ScaledBorderAndShadow: 'yes' | 'no';
   callbackMaker?: (data: DownloadInfo) => HLSCallback;
 };
     
