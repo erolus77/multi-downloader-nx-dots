@@ -8,6 +8,11 @@ const replaceWhitespaceWithDots = (input: string): string => {
   return input.replace(/\s+/g, '.'); // Replaces all whitespaces with dots
 };
 
+// Utility function to remove underscores
+const removeUnderscores = (input: string): string => {
+  return input.replace(/_/g, '');
+};
+
 export type Variable<T extends string = AvailableFilenameVars> = ({
   type: 'number',
   replaceWith: number
@@ -47,6 +52,7 @@ const parseFileName = (input: string, variables: Variable[], numbers: number, ov
 
   // Replace whitespace with dots in the final input
   input = replaceWhitespaceWithDots(input);
+  input = removeUnderscores(input); //Removes Underscore
 
   // Split by path separator and clean each part, then return
   return input.split(path.sep).map(a => shlp.cleanupFilename(a));
