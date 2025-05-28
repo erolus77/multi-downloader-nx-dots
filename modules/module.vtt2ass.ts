@@ -2,17 +2,21 @@
 const cssPrefixRx = /\.rmp-container>\.rmp-content>\.rmp-cc-area>\.rmp-cc-container>\.rmp-cc-display>\.rmp-cc-cue /g;
 
 import { console } from './log';
+//For ScaledBorderAndShadow input
+//import * as yargs from './module.app-args';
+import { appArgv } from './module.app-args';
+const argv = appArgv({});
 
 // colors
 import colors from './module.colors.json';
 const defaultStyleName = 'Default';
-const defaultStyleFont = 'Arial';
+const defaultStyleFont = 'Trebuchet MS';
 
 // predefined
 let relGroup = '';
 let fontSize = 0;
 let tmMrg = 0;
-let rFont = '';
+let rFont = 'Trebuchet MS';
 let doCombineLines = false;
 
 type Css = Record<string, {
@@ -32,8 +36,9 @@ type Vtt = {
 
 function loadCSS(cssStr: string): Css {
   const css = cssStr.replace(cssPrefixRx, '').replace(/[\r\n]+/g, '\n').split('\n');
-  const defaultSFont = rFont == '' ? defaultStyleFont : rFont;
-  let defaultStyle = `${defaultSFont},40,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,1,0,2,20,20,20,1`; //base for nonDialog
+  //const defaultSFont = rFont == '' ? defaultStyleFont : rFont;
+  const defaultSFont = rFont == '' ? 'Trebuchet MS' : rFont;
+  let defaultStyle = `${defaultSFont},24,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,1,0,2,10,10,18,1`; //base for nonDialog
   const styles: Record<string, {
     params: string,
     list: string[]
@@ -68,10 +73,11 @@ function loadCSS(cssStr: string): Css {
 }
 
 function parseStyle(stylegroup: string, line: string, style: any) {
-  const defaultSFont = rFont == '' ? defaultStyleFont : rFont; //redeclare cause of let
+  //const defaultSFont = rFont == '' ? defaultStyleFont : rFont; //redeclare cause of let
+  const defaultSFont = rFont == '' ? 'Trebuchet MS' : rFont; //Force Trebuchet MS
 
   if (stylegroup.startsWith('Subtitle') || stylegroup.startsWith('Song') || stylegroup.startsWith('Q') || stylegroup.startsWith('Default')) { //base for dialog, everything else use defaultStyle
-    style = `${defaultSFont},${fontSize},&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2.6,0,2,20,20,46,1`;
+    style = `${defaultSFont},${fontSize},&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0.5,2,10,10,18,1`;
   }
 
   // Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour,
@@ -90,16 +96,17 @@ function parseStyle(stylegroup: string, line: string, style: any) {
     case 'font-family':
       if (rFont != '') { //do rewrite if rFont is specified
         if (stylegroup.startsWith('Subtitle') || stylegroup.startsWith('Song')) {
-          style[0] = rFont; //dialog to rFont
+          //style[0] = rFont; //dialog to rFont
+		  style[0] = 'Trebuchet MS'; // Change font to Trebuchet MS
         } else {
-          style[0] = defaultStyleFont; //non-dialog to Arial
+          style[0] = defaultStyleFont; //non-dialog to Trebuchet MS
         }
       } else { //otherwise keep default style
         style[0] = st[1].match(/[\s"]*([^",]*)/)![1];
       }
       break;
     case 'font-size':
-      style[1] = getPxSize(st[1], style[1]); //scale it based on input style size... so for dialog, this is the dialog font size set in config, for non dialog, it's 40 from default font size
+      style[1] = getPxSize(st[1], style[1]); //scale it based on input style size... so for dialog, this is the dialog font size set in config, for non dialog, it's 24 from default font size
       break;
     case 'color':
       cl = getColor(st[1]);
@@ -294,14 +301,15 @@ function pushBuffer(buffer: ReturnType<typeof convertLine>[], events: string[]) 
 
 function convert(css: Css, vtt: Vtt[]) {
   const stylesMap: Record<string, string> = {};
+  const scaledSetting = argv.ScaledBorderAndShadow; // get value from CLI args
   let ass = [
     '\ufeff[Script Info]',
     'Title: ' + relGroup,
     'ScriptType: v4.00+',
     'WrapStyle: 0',
-    'PlayResX: 1280',
-    'PlayResY: 720',
-    'ScaledBorderAndShadow: yes',
+    'PlayResX: 640',
+    'PlayResY: 360',
+    `ScaledBorderAndShadow: ${scaledSetting}`,
     '',
     '[V4+ Styles]',
     'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',

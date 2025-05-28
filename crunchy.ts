@@ -22,6 +22,10 @@ import { canDecrypt, getKeysPRD, getKeysWVD, cdm } from './modules/cdm';
 
 // args
 
+//For ScaledBorderAndShadow input
+import { appArgv } from './modules/module.app-args';
+const argv = appArgv({});
+
 // load req
 import { domain, api } from './modules/module.api-urls';
 import * as reqModule from './modules/module.fetch';
@@ -2261,9 +2265,12 @@ export default class Crunchy implements ServiceClass {
                   sxData.file = sxData.file.replace('.vtt','.ass');
                 } else {
                   sBody = '\ufeff' + sBody;
-                  const sBodySplit = sBody.split('\r\n');
-                  sBodySplit.splice(2, 0, 'ScaledBorderAndShadow: yes');
-                  sBody = sBodySplit.join('\r\n');
+                  //const sBodySplit = sBody.split('\r\n');
+                  //sBodySplit.splice(2, 0, 'ScaledBorderAndShadow: yes'); //original code
+				  const sBodySplit = sBody.split('\r\n');
+				  const scaledSetting = argv.ScaledBorderAndShadow; // get value from CLI args
+				  sBodySplit.splice(2, 0, `ScaledBorderAndShadow: ${scaledSetting}`);
+				  sBody = sBodySplit.join('\r\n');
                   sxData.title = sBody.split('\r\n')[1].replace(/^Title: /, '');
                   sxData.title = `${langItem.language} / ${sxData.title}`;
                   sxData.fonts = fontsData.assFonts(sBody) as Font[];
@@ -2354,6 +2361,7 @@ export default class Crunchy implements ServiceClass {
         audio: options.defaultAudio,
         sub: options.defaultSub
       },
+	  signSubsForced: argv.signSubsForced, //new line
       ccTag: options.ccTag
     });
     const bin = Merger.checkMerger(this.cfg.bin, options.mp4, options.forceMuxer);

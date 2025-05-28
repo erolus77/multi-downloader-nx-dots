@@ -223,6 +223,13 @@ Skip downloading audio
 | All | `--nosubs ` | `boolean` | `No`| `NaN` | `NaN` |
 
 Skip downloading subtitles
+#### `--ScaledBorderAndShadow`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| All | `--ScaledBorderAndShadow ${args}` | `string` | `No`| `NaN` | `yes`| `ScaledBorderAndShadow: ` |
+
+Sets ScaledBorderAndShadow value in .ass file to yes or no
+Possible Values: yes, no
 #### `--dubLang`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
@@ -387,6 +394,13 @@ Possible Values: eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara
 
 Set the default subtitle track by language code
 Possible Values: eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, cmn, zho, chi, zh-HK, kor, cat, pol, tha, tam, may, vie, ind, tel, jpn
+#### `--signSubsForced`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| All | `--signSubsForced ${args}` | `string` | `No`| `NaN` | `no`| `signSubsForced: ` |
+
+Set the signs subtitle to forced, default or none
+Possible Values: yes, default, no
 ### Filename Template
 #### `--fileName`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**

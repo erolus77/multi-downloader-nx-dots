@@ -361,6 +361,19 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     type: 'boolean',
     usage: ''
   },
+   {
+    name: 'ScaledBorderAndShadow',
+    describe: 'Scales border and shadow to script or video resolution',
+    type: 'string',
+	choices: ['yes', 'no'],
+    group: 'dl',
+    service: ['crunchy'],
+    docDescribe: true,
+    usage: '',
+    default: {
+      default: 'yes'
+    }
+  },
   {
     name: 'dubLang',
     describe: 'Set the language to download: ' 
@@ -838,6 +851,19 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
       return item;
     }
   },
+    {
+    name: 'signSubsForced',
+    describe: `Set sign subs as forced/default/none`,
+    docDescribe: true,
+    group: 'mux',
+    service: ['all'],
+    type: 'string',
+    usage: '',
+	choices: ['yes', 'default', 'no'],
+    default: {
+      default: 'no'
+    }
+  },
   {
     name: 'ccTag',
     describe: 'Used to set the name for subtitles that contain tranlations for none verbal communication (e.g. signs)',
@@ -887,6 +913,7 @@ const buildDefault = () => {
   });
   return data;
 };
+
 
 export {
   getDefault,
