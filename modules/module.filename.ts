@@ -1,7 +1,7 @@
-import * as shlp from 'sei-helper';
 import path from 'path';
 import { AvailableFilenameVars } from './module.args';
 import { console } from './log';
+import Helper from './module.helper';
 
 // Utility function to replace whitespace with dots
 const replaceWhitespaceWithDots = (input: string): string => {
@@ -48,17 +48,19 @@ const parseFileName = (input: string, variables: Variable[], numbers: number, ov
       input = input.replace(type, replaceStr); 
     } else {
       if (use.sanitize) 
-        use.replaceWith = shlp.cleanupFilename(use.replaceWith);
+        use.replaceWith = Helper.cleanupFilename(use.replaceWith);
       input = input.replace(type, use.replaceWith);
     }
   }
+
 
   // Replace whitespace with dots in the final input
   input = replaceWhitespaceWithDots(input);
   input = removeUnderscores(input); //Removes Underscore
 
   // Split by path separator and clean each part, then return
-  return input.split(path.sep).map(a => shlp.cleanupFilename(a));
+  return input.split(path.sep).map(a => Helper.cleanupFilename(a));
+
 };
 
 const parseOverride = (variables: Variable[], override: string[]): Variable<string>[] => {
