@@ -223,12 +223,12 @@ class Merger {
     args.push(`-o "${this.options.output}"`);
     args.push(...this.options.options.mkvmerge);
 
-    // Ensure "Japanese" audio is the first track
-    this.options.videoAndAudio.sort((a, b) => (a.lang.name === "Japanese" ? -1 : 1));
-    this.options.onlyAudio.sort((a, b) => (a.lang.name === "Japanese" ? -1 : 1));
+    // Ensures "Japanese" audio is the first track
+/*     this.options.videoAndAudio.sort((a, b) => (a.lang.name === "Japanese" ? -1 : 1));
+    this.options.onlyAudio.sort((a, b) => (a.lang.name === "Japanese" ? -1 : 1)); */
 
     // Process video-only tracks
-    for (const vid of this.options.onlyVid) {
+/*     for (const vid of this.options.onlyVid) {
         if (!hasVideo || this.options.keepAllVideos) {
             args.push('--video-tracks 0', '--no-audio');
             args.push('--track-name', `0:"Japanese"`); // Hardcoded video title
@@ -236,10 +236,26 @@ class Merger {
             hasVideo = true;
             args.push(`"${vid.path}"`);
         }
+    } */
+	
+	//original code
+    for (const vid of this.options.onlyVid) {
+      if (!hasVideo || this.options.keepAllVideos) {
+        args.push(
+          '--video-tracks 0',
+          '--no-audio'
+        );
+        //const trackName = ((this.options.videoTitle ?? vid.lang.name) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]'));
+		const trackName = (this.options.videoTitle ?? vid.lang.name);
+        args.push('--track-name', `0:"${trackName}"`);
+        args.push(`--language 0:${vid.lang.code}`);
+        hasVideo = true;
+        args.push(`"${vid.path}"`);
+      }
     }
 
-    // Process video with audio tracks
-    for (const [index, vid] of this.options.videoAndAudio.entries()) {
+    // Hardcoding Japanese audio to be the first audio track.
+/*     for (const [index, vid] of this.options.videoAndAudio.entries()) {
         const audioTrackNum = index === 0 ? "0" : "1"; // Japanese audio will be track 0
         const videoTrackNum = "1";
 
@@ -283,6 +299,63 @@ class Merger {
         }
 
         args.push(`"${aud.path}"`);
+    } */
+	
+	//original code
+	for (const vid of this.options.videoAndAudio) {
+      const audioTrackNum = this.options.inverseTrackOrder ? '0' : '1';
+      const videoTrackNum = this.options.inverseTrackOrder ? '1' : '0';
+      if (vid.delay) {
+        args.push(
+          `--sync ${audioTrackNum}:-${Math.ceil(vid.delay*1000)}`
+        );
+      }
+      if (!hasVideo || this.options.keepAllVideos) {
+        args.push(
+          `--video-tracks ${videoTrackNum}`,
+          `--audio-tracks ${audioTrackNum}`
+        );
+        //const trackName = ((this.options.videoTitle ?? vid.lang.name) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]'));
+		const trackName = (this.options.videoTitle ?? vid.lang.name);
+        args.push('--track-name', `0:"${trackName}"`);
+        //args.push('--track-name', `1:"${trackName}"`);
+        args.push(`--language ${audioTrackNum}:${vid.lang.code}`);
+        if (this.options.defaults.audio.code === vid.lang.code) {
+          args.push(`--default-track ${audioTrackNum}`);
+        } else {
+          args.push(`--default-track ${audioTrackNum}:0`);
+        }
+        hasVideo = true;
+      } else {
+        args.push(
+          '--no-video',
+          `--audio-tracks ${audioTrackNum}`
+        );
+        if (this.options.defaults.audio.code === vid.lang.code) {
+          args.push(`--default-track ${audioTrackNum}`);
+        } else {
+          args.push(`--default-track ${audioTrackNum}:0`);
+        }
+        args.push('--track-name', `${audioTrackNum}:"${vid.lang.name}"`);
+        args.push(`--language ${audioTrackNum}:${vid.lang.code}`);
+      }
+      args.push(`"${vid.path}"`);
+    }
+
+    for (const aud of this.options.onlyAudio) {
+      const trackName = aud.lang.name;
+      args.push('--track-name', `0:"${trackName}"`);
+      args.push(`--language 0:${aud.lang.code}`);
+      args.push(
+        '--no-video',
+        '--audio-tracks 0'
+      );
+      if (this.options.defaults.audio.code === aud.lang.code) {
+        args.push('--default-track 0');
+      } else {
+        args.push('--default-track 0:0');
+      }
+      args.push(`"${aud.path}"`);
     }
 
     /* // Sort subtitle tracks: First regular subtitles, then "signs" and "CC"
