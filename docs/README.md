@@ -95,7 +95,8 @@ Then you can cd into the `lib` folder and you will be able to run the CLI or GUI
 
 ### Build the application into an executable
 
-If you want to package the application, run pnpm run build-`{platform}`-`{type}` where `{platform}` is the operating system (currently the choices are windows, linux, macos, alpine, android, and arm) and `{type}` is cli or gui. For windows: `pnpm run build-windows-x64-cli`
+If you want to package the application, run pnpm run build-`{platform}`-`{type}` where `{platform}` is the operating system (currently the choices are windows, linux, macos, alpine, android, and arm) and `{type}` is cli or gui. 
+For windows: `pnpm run build-windows-x64-cli`
 
 ## DRM Decryption
 
