@@ -2851,12 +2851,19 @@ export default class Crunchy implements ServiceClass {
 											sBody = sBody.replace(/^(PlayResY:\s*\d+)/m, `$1\nLayoutResX: ${playResX}\nLayoutResY: ${playResY}`);
 										}
 
-										// ScaleBorderAndShadow Fix
-										if (options.scaledBorderAndShadowFix && !sBody.includes('ScaledBorderAndShadow')) {
-											sBody = sBody.replace(/^(WrapStyle:.*)$/m, `$1\nScaledBorderAndShadow: ${options.scaledBorderAndShadow}`);
+										// ScaleBorderAndShadow Fix (overrides the original subtitle ScaledBorderAndShadow value)
+										if (options.scaledBorderAndShadowFix) {
+											const newLine = `ScaledBorderAndShadow: ${options.scaledBorderAndShadow}`;
+											if (/^ScaledBorderAndShadow:/m.test(sBody)) {
+												// Replace existing line
+												sBody = sBody.replace(/^ScaledBorderAndShadow:.*$/m, newLine);
+											} else {
+												// Insert below WrapStyle as before
+												sBody = sBody.replace(/^(WrapStyle:.*)$/m, `$1\n${newLine}`);
+											}
 										}
 
-										// Fix VLC wrong parsing if URL not avaiable
+										// Fix VLC wrong parsing if URL not available
 										if (options.originalScriptFix) {
 											sBody = sBody.replace(/^Original Script:.*$/gm, 'Original Script: Crunchyroll');
 										}
@@ -3394,3 +3401,4 @@ export default class Crunchy implements ServiceClass {
 		return episodeList;
 	}
 }
+
