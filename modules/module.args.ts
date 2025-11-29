@@ -482,6 +482,19 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		}
 	},
 	{
+    	name: 'signSubsForced',
+    	describe: 'Set sign subs as forced/default/none',
+    	docDescribe: true,
+    	group: 'mux',
+    	service: ['all'],
+    	type: 'string',
+    	usage: '',
+		choices: ['yes', 'default', 'no'],
+    	default: {
+      		default: 'no'
+    	}
+	},
+	{
 		name: 'novids',
 		group: 'dl',
 		describe: 'Skip downloading videos',
@@ -1087,3 +1100,4 @@ const buildDefault = () => {
 };
 
 export { getDefault, buildDefault, args, groups, availableFilenameVars };
+
