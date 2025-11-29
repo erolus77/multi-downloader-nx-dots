@@ -468,18 +468,31 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 			default: true
 		}
 	},
+	{  
+		name: 'subtitleTimestampFix',
+		group: 'dl',
+		describe:
+			'Fixes subtitle dialogues that go over the video length (deletes dialogues where start is over video length and updates the end timestamp when end is over video length).',
+		docDescribe: true,
+		service: ['crunchy'],
+		type: 'boolean',
+		usage: '',
+		default: {
+			default: false
+		}
+	},
 	{
-    name: 'signSubsForced',
-    describe: `Set sign subs as forced/default/none`,
-    docDescribe: true,
-    group: 'mux',
-    service: ['all'],
-    type: 'string',
-    usage: '',
-	choices: ['yes', 'default', 'no'],
-    default: {
-      default: 'no'
-    }
+    	name: 'signSubsForced',
+    	describe: 'Set sign subs as forced/default/none',
+    	docDescribe: true,
+    	group: 'mux',
+    	service: ['all'],
+    	type: 'string',
+    	usage: '',
+		choices: ['yes', 'default', 'no'],
+    	default: {
+      		default: 'no'
+    	}
 	},
 	{
 		name: 'novids',
@@ -1087,3 +1100,4 @@ const buildDefault = () => {
 };
 
 export { getDefault, buildDefault, args, groups, availableFilenameVars };
+
