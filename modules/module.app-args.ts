@@ -99,6 +99,8 @@ export let argvC: {
 	// Proxy
 	proxy: string;
 	proxyAll: boolean;
+  //handling signs subtitles
+	signSubsForced: 'yes' | 'default' | 'no';
 };
 
 export type ArgvType = typeof argvC;

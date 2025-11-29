@@ -69,7 +69,7 @@ Dependencies that are only required for running from code. These are not require
 
 Please note that NodeJS, NPM, and PNPM must be installed on your system. For instructions on how to install pnpm, check (https://pnpm.io/installation)
 
-First clone this repo `git clone https://github.com/anidl/multi-downloader-nx.git`.
+First clone this repo `git clone https://github.com/erolus77/multi-downloader-nx-dots.git`.
 
 `cd` into the cloned directory and run `pnpm i`. Next, decide if you want to package the application, build the code, or run from typescript.
 
@@ -95,7 +95,8 @@ Then you can cd into the `lib` folder and you will be able to run the CLI or GUI
 
 ### Build the application into an executable
 
-If you want to package the application, run pnpm run build-`{platform}`-`{type}` where `{platform}` is the operating system (currently the choices are windows, linux, macos, alpine, android, and arm) and `{type}` is cli or gui.
+If you want to package the application, run pnpm run build-`{platform}`-`{type}` where `{platform}` is the operating system (currently the choices are windows, linux, macos, alpine, android, and arm) and `{type}` is cli or gui. 
+For windows: `pnpm run build-windows-x64-cli`
 
 ## DRM Decryption
 

@@ -468,7 +468,7 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 			default: true
 		}
 	},
-	{
+	{  
 		name: 'subtitleTimestampFix',
 		group: 'dl',
 		describe:
