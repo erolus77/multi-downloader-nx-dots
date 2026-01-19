@@ -252,11 +252,13 @@ const getCommander = (cfg: Record<string, unknown>, isGUI: boolean) => {
 					: `--${item.name}`) + (item.type === 'boolean' ? '' : ` <value>`),
 			item.describe ?? ''
 		);
-		if (item.default !== undefined) option.default(item.default);
+		if (item.default !== undefined) option.default(item.transformer ? item.transformer(item.default) : item.default);
 
 		const optionNames = [...args.map((a) => `--${a.name}`), ...args.map((a) => (a.alias ? `-${a.alias}` : null)).filter(Boolean)];
 
 		option.argParser((value) => {
+			if (item.transformer) return item.transformer(value);
+
 			// Prevent from passing other options als value for option
 			if (value && typeof value === 'string' && value.startsWith('-') && optionNames.includes(value)) return undefined;
 
@@ -295,8 +297,6 @@ const getCommander = (cfg: Record<string, unknown>, isGUI: boolean) => {
 					process.exit(1);
 				}
 			}
-
-			if (item.transformer) return item.transformer(value);
 			return value;
 		});
 
