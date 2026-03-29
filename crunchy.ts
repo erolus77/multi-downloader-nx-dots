@@ -369,26 +369,6 @@ export default class Crunchy implements ServiceClass {
 		console.info('All required fonts downloaded!');
 	}
 
-	// private async productionToken() {
-	//   const tokenReq = await this.req.getData(api.bundlejs);
-
-	//   if (!tokenReq.ok || !tokenReq.res) {
-	//     console.error('Failed to get Production Token!');
-	//     return { isOk: false, reason: new Error('Failed to get Production Token') };
-	//   }
-
-	//   const rawjs = await tokenReq.res.text();
-
-	//   const tokens = rawjs.match(/prod="([\w-]+:[\w-]+)"/);
-
-	//   if (!tokens) {
-	//     console.error('Failed to find Production Token in js!');
-	//     return { isOk: false, reason: new Error('Failed to find Production Token in js') };
-	//   }
-
-	//   return Buffer.from(tokens[1], 'latin1').toString('base64');
-	// }
-
 	public async doAuth(data: AuthData): Promise<AuthResponse> {
 		const basic = atob(api.basic_auth_token);
 		const client = basic.split(':');
@@ -1675,7 +1655,7 @@ export default class Crunchy implements ServiceClass {
 
 					//Make a format more usable for the crunchy chapters
 					for (const chapter in chapterData) {
-						if (typeof chapterData[chapter] == 'object') {
+						if (chapterData[chapter] && typeof chapterData[chapter] == 'object') {
 							chapters.push(chapterData[chapter]);
 						}
 					}
@@ -2956,19 +2936,17 @@ export default class Crunchy implements ServiceClass {
 											sBody = sBody.replace(/^(PlayResY:\s*\d+)/m, `$1\nLayoutResX: ${playResX}\nLayoutResY: ${playResY}`);
 										}
 
-										// ScaleBorderAndShadow Fix (overrides the original subtitle ScaledBorderAndShadow value)
-										if (options.scaledBorderAndShadowFix) {
-											const newLine = `ScaledBorderAndShadow: ${options.scaledBorderAndShadow}`;
-											if (/^ScaledBorderAndShadow:/m.test(sBody)) {
-												// Replace existing line
-												sBody = sBody.replace(/^ScaledBorderAndShadow:.*$/m, newLine);
-											} else {
-												// Insert below WrapStyle as before
-												sBody = sBody.replace(/^(WrapStyle:.*)$/m, `$1\n${newLine}`);
-											}
+										// ScaleBorderAndShadow Fix (True and doesn't exist)
+										if (options.scaledBorderAndShadowFix && !sBody.includes('ScaledBorderAndShadow')) {
+											sBody = sBody.replace(/^(WrapStyle:.*)$/m, `$1\nScaledBorderAndShadow: ${options.scaledBorderAndShadow}`);
 										}
 
-										// Fix VLC wrong parsing if URL not available
+										// ScaleBorderAndShadow Fix (True and exists)
+										if (options.scaledBorderAndShadowFix && sBody.includes('ScaledBorderAndShadow')) {
+											sBody = sBody.replace(/ScaledBorderAndShadow:\s*(yes|no)/, `ScaledBorderAndShadow: ${options.scaledBorderAndShadow}`);
+										}
+
+										// Fix VLC wrong parsing if URL not avaiable
 										if (options.originalScriptFix) {
 											sBody = sBody.replace(/^Original Script:.*$/gm, 'Original Script: Crunchyroll');
 										}
@@ -3378,7 +3356,7 @@ export default class Crunchy implements ServiceClass {
 					],
 					seriesTitle: itemE.items.find((a) => !a.series_title.match(/\(\w+ Dub\)/))?.series_title ?? itemE.items[0].series_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
 					seasonTitle: itemE.items.find((a) => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? itemE.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
-					episodeNumber: item.episode,
+					episodeNumber: epNum,
 					episodeTitle: item.title,
 					seasonID: item.season_id,
 					season: item.season_number,
