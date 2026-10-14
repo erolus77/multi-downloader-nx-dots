@@ -1532,8 +1532,11 @@ export default class Crunchy implements ServiceClass {
 		} catch (err) {
 			return audioUrl;
 		}
+	}	
+	private applyCbrTransform(url: string): string {
+		return url.replace('/static/majin/', '/static/').replace(/\/(?:\d+\/)?clean\/(?:cenc\/)?dash\//, `/0/clean/dash/`);
 	}
-
+	
 	public async downloadMediaList(
 		medias: CrunchyEpMeta,
 		options: CrunchyDownloadOptions
@@ -1823,6 +1826,13 @@ export default class Crunchy implements ServiceClass {
 					subtitles: videoStream.subtitles,
 					versions: videoStream.versions
 				};
+				
+				if (options.cbr) {
+					for (const key in derivedPlaystreams) {
+						derivedPlaystreams[key].url = this.applyCbrTransform(derivedPlaystreams[key].url);
+					}
+				}
+					
 				pbData.vpb[`adaptive_${options.vstream}_${videoStream.url.includes('m3u8') ? 'hls' : 'dash'}_drm`] = {
 					...derivedPlaystreams
 				};
