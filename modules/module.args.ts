@@ -1041,6 +1041,18 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		}
 	},
 	{
+		name: 'cbr',
+		group: 'dl',
+		describe: 'Forces CBR streams',
+		docDescribe: true,
+		service: ['crunchy'],
+		type: 'boolean',
+		usage: '',
+		default: {
+			default: false
+		}
+	},
+	{
 		name: 'proxy',
 		describe: 'Uses Proxy on geo-restricted or geo-defining endpoints (e.g. https://127.0.0.1:1080 or http://127.0.0.1:1080)',
 		docDescribe: true,
