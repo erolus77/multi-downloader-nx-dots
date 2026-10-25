@@ -1,4 +1,4 @@
-# multi-downloader-nx (v5.8.4)
+# multi-downloader-nx (v5.8.6)
 
 If you find any bugs in this documentation or in the program itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -208,12 +208,6 @@ Select a specific Crunchyroll video playback endpoint by device. androidtv provi
 | Crunchyroll | `--astream ${device}` | `string` | `No`| `--as` | [`androidtv`, `android`, `androidtab`, `none`] | `android`| `astream: ` |
 
 Select a specific Crunchyroll audio playback endpoint by device. android provides the best audio (192 kbps).
-#### `--cbr`
-| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
-| --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--cbr ` | `boolean` | `No`| `NaN` | `false`| `cbr: ` |
-
-Forces the download of old CBR streams instead of the newer Majin ones.
 #### `--tsd`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
@@ -469,13 +463,6 @@ Possible Values: und, eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME
 
 Set the default subtitle track by language code
 Possible Values: und, eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, cmn, zho, chi, zh-HK, kor, cat, pol, tha, tam, may, vie, ind, tel, jpn
-#### `--signSubsForced`
-| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
-| --- | --- | --- | --- | --- | --- | ---| 
-| All | `--defaultSub ${args}` | `string` | `No`| `NaN` | `no`| `signSubsForced: ` |
-
-Set the signs subtitle track as forced/default/none
-Possible Values: yes, no, default; where yes = forced + default, default = default track, no = none
 ### Filename Template
 #### `--fileName`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
