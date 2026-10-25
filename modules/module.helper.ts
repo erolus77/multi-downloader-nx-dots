@@ -29,7 +29,7 @@ export default class Helper {
 		const rep: Record<string, string> = {
 			'/': '⧸',
 			'\\': '⧹',
-			':': '：',
+			':': '_',
 			'*': '∗',
 			'?': '？',
 			'"': "'",

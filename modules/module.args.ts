@@ -468,7 +468,7 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 			default: true
 		}
 	},
-	{
+	{  
 		name: 'subtitleTimestampFix',
 		group: 'dl',
 		describe:
@@ -480,6 +480,19 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		default: {
 			default: false
 		}
+	},
+	{
+    	name: 'signSubsForced',
+    	describe: 'Set sign subs as forced/default/none',
+    	docDescribe: true,
+    	group: 'mux',
+    	service: ['all'],
+    	type: 'string',
+    	usage: '',
+		choices: ['yes', 'default', 'no'],
+    	default: {
+      		default: 'no'
+    	}
 	},
 	{
 		name: 'novids',
@@ -1028,6 +1041,18 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		}
 	},
 	{
+		name: 'cbr',
+		group: 'dl',
+		describe: 'Forces CBR streams',
+		docDescribe: true,
+		service: ['crunchy'],
+		type: 'boolean',
+		usage: '',
+		default: {
+			default: false
+		}
+	},
+	{
 		name: 'proxy',
 		describe: 'Uses Proxy on geo-restricted or geo-defining endpoints (e.g. https://127.0.0.1:1080 or http://127.0.0.1:1080)',
 		docDescribe: true,
@@ -1087,3 +1112,4 @@ const buildDefault = () => {
 };
 
 export { getDefault, buildDefault, args, groups, availableFilenameVars };
+
